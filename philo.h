@@ -5,63 +5,73 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: yasinbestrioui <marvin@42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/24 11:36:00 by yasinbest         #+#    #+#             */
-/*   Updated: 2022/01/27 17:40:59 by yasinbest        ###   ########.fr       */
+/*   Created: 2022/01/29 10:52:24 by yasinbest         #+#    #+#             */
+/*   Updated: 2022/02/02 12:03:07 by ybestrio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 #ifndef PHILO_H
 # define PHILO_H
 
-#include <string.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/time.h>
+# include <unistd.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <limits.h>
+# include <pthread.h>
+# include <sys/time.h>
 
-typedef struct	philo {
-	pthread_t		id;
+typedef struct philo {
 	pthread_mutex_t	state;
-	size_t			nbr; //n+1
-	size_t			nb;
-	int				sts;
+	pthread_t		id;
 	uint64_t		limit;
-	int 			lfork;
-	int 			rfork;
+	uint64_t		last_eat;
 	int				eatcount;
-} t_philo;
-
-typedef struct	data {
-	int				nb;
-	uint64_t		eat; //status 2
-	uint64_t		die; //status 1
-	uint64_t		slp; //status 3
-	int				must;
-	int				max;
-	int				eatcount;
-	size_t			counter;
-	pthread_mutex_t	wrtlck;
-	pthread_mutex_t	idset;
-	pthread_mutex_t	*fork;
 	int				status;
-	uint64_t		start;
-	t_philo 		*philo;
-} data;
+	int				rfork;
+	int				lfork;
+	int				nbr;
+	int				n;
+}	t_philo;
 
-//void		ft_setdata(int argc, char **argv);
-void		ft_exceptions(int argc, char **argv);
+typedef struct data {
+	pthread_mutex_t	*fork;
+	pthread_mutex_t	log;
+	pthread_t		thread;
+	pthread_t		m_thread;
+	pthread_t		mc_thread;
+	t_philo			*philo;
+	uint64_t		start;
+	uint64_t		ttd;
+	uint64_t		tte;
+	uint64_t		tts;
+	int				eatcount;
+	int				max;
+	int				status;
+	int				n;
+	int				argc;
+}	t_data;
+
+void		*ft_start(void *smths);
+void		ft_msg(t_data *data, int nbr, int msg);
+int			ft_init(int argc, char *argv[], t_data *data);
+int			ft_philo_init(t_data *data, int n);
+int			ft_exit_thread(t_data *data);
+int			ft_fork_init(t_data *data);
+
+int			ft_routine(t_data *data, t_philo *philo);
+int			ft_routine2(t_data *data, t_philo *philo);
+
 uint64_t	ft_gettime(void);
-void		ft_msg(data *data, size_t id,int msg);
-void		ft_putchar(char c);
 void		ft_putnbr(uint64_t n);
-int		ft_startthink(data *data, int max, t_philo *philo);
-void		ft_grabfork(data *data, int max, t_philo *philo);
-void	ft_fork_init(data *data);
-void		ft_statusmonitor(data *data, int a, int b);
-int	ft_routine2(data *data, t_philo *philo);
-int	ft_free(data *data);
-int	ft_exit_thread(data *data);
-int	ft_routine(data *data, t_philo *philo);
+int			ft_isnum(char *str);
+int			ft_atoi(char *str);
+
+void		*ft_monitor_count(void *param);
+void		*ft_monitor(void *param);
+void		ft_monitoring(t_data *data, int n, int j);
+int			ft_exceptions(int argc, char *argv[], t_data *data);
+int			ft_checkeat(t_data *data, int nbr);
+int			ft_free(t_data *data);
+int			ft_error(int nbr);
+int			ft_onlynum(int argc, char **argv);
 
 #endif

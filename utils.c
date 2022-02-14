@@ -5,86 +5,72 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: yasinbestrioui <marvin@42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/01/25 17:22:35 by yasinbest         #+#    #+#             */
-/*   Updated: 2022/01/27 17:28:20 by yasinbest        ###   ########.fr       */
+/*   Created: 2022/01/29 10:49:41 by yasinbest         #+#    #+#             */
+/*   Updated: 2022/02/02 12:10:28 by ybestrio         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #include "philo.h"
 
-int	ft_checkeat(data *data, int nbr)
+int	ft_onlynum(int argc, char **argv)
 {
-	if (data->eatcount == -1)
-		return (0);
-	if (data->philo[nbr].eatcount >= data->eatcount)
-		return (1);
+	int	i;
+	int	a;
+
+	i = -1;
+	a = 0;
+	while (++a < argc)
+	{
+		i = -1;
+		while (argv[a][++i] != 0)
+		{
+			if (argv[a][i] > 57 || argv[a][i] < 48)
+				return (1);
+		}
+	}
 	return (0);
 }
 
-void	ft_statusmonitor(data *data, int a, int b)
+int	ft_isnum(char *str)
 {
-	while (!data->status)
+	int	n;
+
+	n = 0;
+	while (str[n])
 	{
-		a = 0;
-		b = 0;
-		while (!data->status && a < data->max)
-		{
-			if (ft_gettime() >= data->philo[a].limit)
-			{
-				ft_msg(data, -1, a + 1);
-				data->status = -1;
-				pthread_mutex_lock(&data->philo[a].state);
-				return ;
-			}
-			if (ft_checkeat(data, a))
-				b++;
-			a++;
-		}
-		if (b == data->max)
-		{
-			ft_msg(data, 5, a);
-			data->status = -1;
-			pthread_mutex_lock(&data->philo[a].state);
-			return ;
-		}
+		if (n == 0 && (str[n] == '-' || str[n] == '+'))
+			n++;
+		if (str[n] < '0' || str[n] > '9')
+			return (-1);
+		n++;
 	}
+	return (1);
 }
 
-void ft_msg(data *data, size_t nbr, int msg)
+int	ft_atoi(char *str)
 {
-/*	pthread_mutex_lock(&data->wrtlck);
-	ft_putnbr(ft_gettime() - data->start);
-	write(1, " ", 1);
-	ft_putnbr(id);
-	if (msg == 1)
+	int			n;
+	long int	nbr;
+	int			sign;
+	int			j;
+
+	n = 0;
+	nbr = 0;
+	sign = 1;
+	j = 0;
+	if (str[n] == '-')
 	{
-		write(1, " is thinking\n", 13);
+		sign = -1;
+		n++;
 	}
-	if (msg == 2)
-	{
-		write(1, " took a fork\n", 13 );
-	}
-	usleep(5000);
-	pthread_mutex_unlock(&data->wrtlck);*/
-	if (!data || data->status || msg == 5)
-		return ;
-	pthread_mutex_lock(&data->wrtlck);
-	if (data->status)
-		return ;
-	ft_putnbr(ft_gettime() - data->start);
-	write (1, " ", 1);
-	ft_putnbr(nbr);
-	if (msg == -1)
-		write(1, " died\n", 6);
-	else if (msg == 1)
-		write(1, " has taken a fork\n", 19);
-	else if (msg == 2)
-		write(1, " is eating\n", 12);
-	else if (msg == 3)
-		write(1, " is sleeping\n", 14);
-	else if (msg == 4)
-		write(1, " is thinking\n", 14);
-	if (!data->status)
-		pthread_mutex_unlock(&data->wrtlck);
+	else if (str[n] == '+')
+		n++;
+	if (ft_isnum(str) == -1)
+		return (0);
+	while (str[n])
+		nbr = nbr * 10 + str[n++] - '0';
+	if ((nbr > INT_MAX && sign == 1) || (nbr * sign < INT_MIN))
+		return (0);
+	return (nbr * sign);
 }
 
 uint64_t	ft_gettime(void)
@@ -93,4 +79,18 @@ uint64_t	ft_gettime(void)
 
 	gettimeofday(&time, NULL);
 	return (time.tv_sec * (uint64_t)1000 + (time.tv_usec / 1000));
+}
+
+void	ft_putnbr(uint64_t n)
+{
+	unsigned int	nbr;
+
+	nbr = (unsigned int) n;
+	while (nbr > 9)
+	{
+		ft_putnbr(nbr / 10);
+		nbr %= 10;
+	}
+	nbr += '0';
+	write(1, &nbr, 1);
 }
